@@ -22,6 +22,8 @@ pub mod rsmod;
 // alloc on the heap for the wasm module globally.
 static mut COLLISION_FLAGS: Lazy<CollisionFlagMap> = Lazy::new(CollisionFlagMap::new);
 static mut PATHFINDER: Lazy<PathFinder> = Lazy::new(PathFinder::new);
+// 512x512 grid for long-distance pathfinding (up to 256 tiles in any direction)
+static mut LONG_PATHFINDER: Lazy<PathFinder> = Lazy::new(|| PathFinder::with_size(512, 16384));
 
 #[wasm_bindgen]
 pub unsafe fn findPath(
@@ -41,6 +43,42 @@ pub unsafe fn findPath(
     collision: CollisionType,
 ) -> Vec<u32> {
     return PATHFINDER.find_path(
+        &**addr_of!(COLLISION_FLAGS),
+        y,
+        srcX,
+        srcZ,
+        destX,
+        destZ,
+        srcSize,
+        destWidth,
+        destHeight,
+        angle,
+        shape,
+        moveNear,
+        blockAccessFlags,
+        maxWaypoints,
+        &get_collision_strategy(collision),
+    );
+}
+
+#[wasm_bindgen]
+pub unsafe fn findLongPath(
+    y: i32,
+    srcX: i32,
+    srcZ: i32,
+    destX: i32,
+    destZ: i32,
+    srcSize: u8,
+    destWidth: u8,
+    destHeight: u8,
+    angle: u8,
+    shape: i8,
+    moveNear: bool,
+    blockAccessFlags: u8,
+    maxWaypoints: u8,
+    collision: CollisionType,
+) -> Vec<u32> {
+    return LONG_PATHFINDER.find_path(
         &**addr_of!(COLLISION_FLAGS),
         y,
         srcX,

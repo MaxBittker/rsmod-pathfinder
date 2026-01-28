@@ -35,9 +35,15 @@ impl PathFinder {
 
     #[inline(always)]
     pub fn new() -> PathFinder {
-        let search_map_size = PathFinder::DEFAULT_SEARCH_MAP_SIZE;
-        let ring_buffer_size = PathFinder::DEFAULT_RING_BUFFER_SIZE;
-        return PathFinder {
+        PathFinder::with_size(
+            PathFinder::DEFAULT_SEARCH_MAP_SIZE,
+            PathFinder::DEFAULT_RING_BUFFER_SIZE,
+        )
+    }
+
+    #[inline(always)]
+    pub fn with_size(search_map_size: i32, ring_buffer_size: i32) -> PathFinder {
+        PathFinder {
             search_map_size,
             search_half_map_size: search_map_size / 2,
             ring_buffer_size,
@@ -52,7 +58,7 @@ impl PathFinder {
             curr_local_z: 0,
             buf_reader_index: 0,
             buf_writer_index: 0,
-        };
+        }
     }
 
     #[inline(always)]

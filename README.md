@@ -7,6 +7,42 @@ Ported from Kotlin: 🔗 https://github.com/rsmod/rsmod/tree/main/engine/pathfin
 
 ----
 
+## ✨ Features
+
+- **`findPath`** - Standard pathfinding with 128x128 search grid (up to 64 tiles in any direction)
+- **`findLongPath`** - Long-distance pathfinding with 512x512 search grid (up to 256 tiles in any direction)
+
+Both functions share the same API. Use `findLongPath` when your destination may be more than 64 tiles away from the source.
+
+```typescript
+import * as rsmod from '@2004scape/rsmod-pathfinder';
+
+// Standard pathfinding (max ~64 tiles)
+const path = rsmod.findPath(
+    level,           // y/level (0-3)
+    srcX, srcZ,      // source coordinates
+    destX, destZ,    // destination coordinates
+    srcSize,         // source entity size (1, 2, 3+)
+    destWidth, destHeight,  // destination dimensions
+    angle,           // object angle (0-3)
+    shape,           // object shape (-1 for none)
+    moveNear,        // allow partial path to nearest point
+    blockAccessFlags,// block access restrictions
+    maxWaypoints,    // max waypoints to return
+    CollisionType.NORMAL
+);
+
+// Long-distance pathfinding (max ~256 tiles)
+const longPath = rsmod.findLongPath(
+    level, srcX, srcZ, destX, destZ,
+    srcSize, destWidth, destHeight,
+    angle, shape, moveNear, blockAccessFlags,
+    maxWaypoints, CollisionType.NORMAL
+);
+```
+
+----
+
 ## ✨ Installing
 
 > 🔗 https://www.npmjs.com/package/@2004scape/rsmod-pathfinder
@@ -94,10 +130,33 @@ on a server also using TypeScript.
 `cargo bench`
 
 ```
-pathfinder/find_path    time:   [6.8195 µs 7.1890 µs 7.4884 µs]
-                        thrpt:  [133.54 Kelem/s 139.10 Kelem/s 146.64 Kelem/s]
+pathfinder/find_path_short_128x128
+                        time:   [4.58 µs 4.66 µs 4.73 µs]
+                        thrpt:  [211K elem/s 214K elem/s 218K elem/s]
 
+long_pathfinder/find_path_short_512x512
+                        time:   [29.5 µs 30.1 µs 30.8 µs]
+                        thrpt:  [32.5K elem/s 33.2K elem/s 33.9K elem/s]
+
+long_pathfinder/find_path_medium_512x512
+                        time:   [60.4 µs 62.2 µs 64.6 µs]
+                        thrpt:  [15.5K elem/s 16.1K elem/s 16.6K elem/s]
+
+long_pathfinder/find_path_long_512x512
+                        time:   [56.2 µs 56.9 µs 57.6 µs]
+                        thrpt:  [17.4K elem/s 17.6K elem/s 17.8K elem/s]
 ```
+
+### Performance Summary
+
+| Function | Grid Size | Path Distance | Time per Call | Memory |
+|----------|-----------|---------------|---------------|--------|
+| `findPath` | 128x128 | 10 tiles | ~4.7 µs | ~200 KB |
+| `findLongPath` | 512x512 | 10 tiles | ~30 µs | ~3.2 MB |
+| `findLongPath` | 512x512 | 40 tiles | ~62 µs | ~3.2 MB |
+| `findLongPath` | 512x512 | 90 tiles | ~57 µs | ~3.2 MB |
+
+For bot applications with 100-500 concurrent pathfinding requests, `findLongPath` adds only 6-30ms per tick.
 
 ----
 
