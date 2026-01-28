@@ -1123,22 +1123,21 @@ impl PathFinder {
         width: u8,
         height: u8,
     ) -> bool {
-        let mut lowest_cost: i32 = PathFinder::MAX_ALTERNATIVE_ROUTE_LOWEST_COST;
-        let mut max_alternative_path: i32 = PathFinder::MAX_ALTERNATIVE_ROUTE_SEEK_RANGE;
-        let alternative_route_range: i32 =
-            PathFinder::MAX_ALTERNATIVE_ROUTE_DISTANCE_FROM_DESTINATION;
+        let mut lowest_cost: i32 = i32::MAX;
+        let mut lowest_distance: i32 = i32::MAX;
 
-        for x in local_dest_x - alternative_route_range..=local_dest_x + alternative_route_range {
-            for z in local_dest_z - alternative_route_range..=local_dest_z + alternative_route_range
-            {
-                if !(x >= 0 && x < self.search_map_size)
-                    || !(z >= 0 && z < self.search_map_size)
-                    || *self.distances.as_ptr().add(self.local_index(x, z))
-                        >= PathFinder::MAX_ALTERNATIVE_ROUTE_SEEK_RANGE
-                {
+        // Scan ALL visited tiles in the search grid to find the closest one to destination.
+        // A tile is "visited" if its distance is not the default unvisited value.
+        for x in 0..self.search_map_size {
+            for z in 0..self.search_map_size {
+                let distance = *self.distances.as_ptr().add(self.local_index(x, z));
+
+                // Skip unvisited tiles
+                if distance >= PathFinder::DEFAULT_DISTANCE_VALUE {
                     continue;
                 }
 
+                // Calculate distance to destination (accounting for destination width/height)
                 let mut dx: i32 = 0;
                 if x < local_dest_x {
                     dx = local_dest_x - x;
@@ -1153,20 +1152,20 @@ impl PathFinder {
                     dz = z - (height as i32 + local_dest_z - 1);
                 }
 
+                // Cost is squared distance to destination
                 let cost: i32 = dx * dx + dz * dz;
-                if cost < lowest_cost
-                    || (cost == lowest_cost
-                        && max_alternative_path
-                            > *self.distances.as_ptr().add(self.local_index(x, z)))
-                {
+
+                // Prefer tiles closer to destination, break ties by preferring shorter paths
+                if cost < lowest_cost || (cost == lowest_cost && distance < lowest_distance) {
                     self.curr_local_x = x;
                     self.curr_local_z = z;
                     lowest_cost = cost;
-                    max_alternative_path = *self.distances.as_ptr().add(self.local_index(x, z));
+                    lowest_distance = distance;
                 }
             }
         }
-        return lowest_cost != PathFinder::MAX_ALTERNATIVE_ROUTE_LOWEST_COST;
+
+        return lowest_cost != i32::MAX;
     }
 
     #[inline(always)]
