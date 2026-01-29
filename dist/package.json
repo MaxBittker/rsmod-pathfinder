@@ -1,0 +1,29 @@
+{
+  "name": "rsmod-pathfinder",
+  "collaborators": [
+    "2004Scape"
+  ],
+  "description": "A breadth-first search path finder.",
+  "version": "5.0.4",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/2004scape/rsmod-pathfinder"
+  },
+  "files": [
+    "rsmod-pathfinder_bg.wasm",
+    "rsmod-pathfinder.js",
+    "rsmod-pathfinder.d.ts",
+    "LICENSE.md"
+  ],
+  "main": "rsmod-pathfinder.js",
+  "homepage": "https://github.com/2004scape/rsmod-pathfinder#readme",
+  "types": "rsmod-pathfinder.d.ts",
+  "keywords": [
+    "rsmod",
+    "pathfinder",
+    "bfs",
+    "rust",
+    "webassembly"
+  ]
+}
